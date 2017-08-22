@@ -12,8 +12,10 @@ class CatalystConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=False"
     generators = "cmake"
+    exports = ["FindCatalyst.cmake"]
 
     source_dir_name = "Catalyst-v%s-Base-Enable-Python-Essentials-Extras-Rendering-Base" % version
+    install_dir = "_install"
 
     def source(self):
         zip_name = "%s.tar.gz" % self.source_dir_name
@@ -25,17 +27,18 @@ class CatalystConan(ConanFile):
         pack_name = None
         if os_info.linux_distro == "ubuntu":
             pack_name = "openmpi" # libopenmpi-dev
-        elif os_info.linux_distro == "fedora" or os_info.linux_distro == "centos":
-            pack_name = "package_name_in_fedora_and_centos"
         elif os_info.is_macos:
             pack_name = "open-mpi"
-    
         if pack_name:
             installer = SystemPackageTool()
             installer.install(pack_name)
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.install_dir
+        cmake.definitions["PARAVIEW_INSTALL_DEVELOPMENT_FILES"] = "ON"
+        if os_info.is_macos:
+            cmake.definitions["PARAVIEW_DO_UNIX_STYLE_INSTALLS"] = "ON"
         if self.options.shared == False:
             cmake.definitions["BUILD_SHARED_LIBS"] = "OFF"
         if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
@@ -45,13 +48,9 @@ class CatalystConan(ConanFile):
         cmake.build()
         cmake.install()
 
-    #def package(self):
-    #    self.copy("*.h", dst="include", src="hello")
-    #    self.copy("*hello.lib", dst="lib", keep_path=False)
-    #    self.copy("*.dll", dst="bin", keep_path=False)
-    #    self.copy("*.so", dst="lib", keep_path=False)
-    #    self.copy("*.dylib", dst="lib", keep_path=False)
-    #    self.copy("*.a", dst="lib", keep_path=False)
+    def package(self):
+        self.copy("*", dst=".", src=self.install_dir)
+        self.copy("FindCatalyst.cmake", dst=".", src=self.conanfile_directory)
 
     #def package_info(self):
     #    self.cpp_info.libs = ["hello"]

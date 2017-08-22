@@ -1,6 +1,8 @@
 #include <iostream>
-#include "hello.h"
+#include "vtkUnstructuredGridReader.h"
 
 int main() {
-    hello();
+    vtkUnstructuredGridReader* reader = vtkUnstructuredGridReader::New();
+    reader->Delete();
+    return 0;
 }

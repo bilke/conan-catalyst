@@ -6,7 +6,7 @@ username = os.getenv("CONAN_USERNAME", "bilke")
 
 class CatalystTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "Catalyst/5.4.1@%s/%s" % (username, channel)
+    requires = "catalyst/5.4.1@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):
@@ -20,5 +20,4 @@ class CatalystTestConan(ConanFile):
         self.copy("*.dylib*", dst="bin", src="lib")
 
     def test(self):
-        os.chdir("bin")
         self.run(".%sexample" % os.sep)
